@@ -43,7 +43,7 @@ class TheWhiteRoom(Gtk.Window):
         super().__init__(title="The White Room")
         self.set_default_size(640,480) # TODO: Make it 16 colours only
 
-        self.box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
+        self.box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, margin=25)
         self.add(self.box)
         self.init_dashboard()
 
@@ -63,15 +63,15 @@ class TheWhiteRoom(Gtk.Window):
         #https://lazka.github.io/pgi-docs/Gtk-3.0/classes/Grid.html#Gtk.Grid
         self.box.show_all()
 
+    # Make Inventory Space "page"
     def init_invspc(self, widget):
         self.clearall() # Clear box
         
         # Add all locations
         db = sqlite3.connect("data.db")
         cursor = db.cursor()
-        cursor.execute("SELECT * FROM LOCATIONS")
+        cursor.execute("SELECT * FROM locations")
         locations = cursor.fetchall()
-        db.close()
         
         self.location_labels = [] # List of Tuple's ofGtk.Label objects paired with their add item button
 
@@ -80,8 +80,15 @@ class TheWhiteRoom(Gtk.Window):
             label = Gtk.Label(label=location_name)
             self.box.add(label)
 
+            # Get all items in this location
+            cursor.execute("SELECT * FROM items WHERE location_id = ?", (location_id,))
+            items = cursor.fetchall()
+            for item in items:
+                itemlabel = Gtk.Label(label=f"{item[1]} - {item[2]}", margin_bottom=5)
+                self.box.add(itemlabel)
+
             # Add item to this location button
-            btn_add_item = Gtk.Button(label="Add item")
+            btn_add_item = Gtk.Button(label="Add item", margin_bottom=25)
             btn_add_item.location_id = location_id # adds attribute to button without making a sub class
             btn_add_item.connect("clicked", self.add_item_to_location)
             self.box.add(btn_add_item)
@@ -93,7 +100,7 @@ class TheWhiteRoom(Gtk.Window):
         self.dashboardbutton = Gtk.Button(label="Dashboard", margin=0)
         self.dashboardbutton.connect("clicked", self.init_dashboard)
         self.box.add(self.dashboardbutton)
-
+        db.close()
         self.box.show_all()
 
 
