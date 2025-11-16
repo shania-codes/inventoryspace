@@ -43,8 +43,12 @@ class TheWhiteRoom(Gtk.Window):
         super().__init__(title="The White Room")
         self.set_default_size(640,480) # TODO: Make it 16 colours only
 
+        self.scrolled = Gtk.ScrolledWindow()
+        self.scrolled.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC)
+        self.add(self.scrolled)
+
         self.box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, margin=25)
-        self.add(self.box)
+        self.scrolled.add(self.box)
         self.init_dashboard()
 
     def clearall(self):
