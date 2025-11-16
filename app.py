@@ -152,10 +152,49 @@ class TheWhiteRoom(Gtk.Window):
         dialog.destroy()
         self.init_invspc(widget=None)
 
-    def edit_item(self, widget=None):
-        return 0
+    def edit_item(self, button):
+        item_id = button.item_id
+        
+        # Get current item data
+        db = sqlite3.connect("data.db")
+        cursor = db.cursor()
+        cursor.execute("SELECT * FROM items WHERE id=?", (item_id,))
+        item = cursor.fetchone()
+        db.close()
 
-    def delete_item(self, widget=None):
+        # Open Sub Window
+        dialog = Gtk.Dialog(title="Edit Item", parent=self)
+        dialog.add_button("Cancel", Gtk.ResponseType.CANCEL)
+        dialog.add_button("Save", Gtk.ResponseType.OK)
+
+        box = dialog.get_content_area()
+
+        name_entry = Gtk.Entry()
+        name_entry.set_text(item[1])
+        name_entry.set_placeholder_text("Item Name")
+        box.add(name_entry)
+
+        desc_entry = Gtk.Entry()
+        desc_entry.set_text(item[2] or "")
+        desc_entry.set_placeholder_text("Item Description")
+        box.add(desc_entry)
+
+        # Show Sub Window
+        dialog.show_all()
+        response = dialog.run()
+        if response == Gtk.ResponseType.OK:
+            new_name = name_entry.get_text()
+            new_desc = desc_entry.get_text()
+            db = sqlite3.connect("data.db")
+            cursor = db.cursor()
+            cursor.execute("UPDATE items SET name=?, description=? WHERE id=?", (new_name, new_desc, item_id))
+            db.commit()
+            db.close()
+
+        dialog.destroy()
+        self.init_invspc(None) # Refresh inventory space "page"
+
+    def delete_item(self, button):
         return 0
 
 win = TheWhiteRoom()
