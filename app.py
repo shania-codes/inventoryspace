@@ -32,8 +32,6 @@ def initdb():
     # Add initial "location" for items with no location
     cursor.execute("INSERT OR IGNORE INTO locations (id, name) VALUES (0, 'No Location')")
 
-    #cursor.execute("INSERT INTO locations (id, name) VALUES (2, 'Freezer')")
-
 
     db.commit()
     db.close()
