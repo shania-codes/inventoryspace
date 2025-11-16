@@ -128,6 +128,7 @@ class TheWhiteRoom(Gtk.Window):
             db.close()
 
         dialog.destroy()
+        self.init_invspc(widget=None)
 
 
 
