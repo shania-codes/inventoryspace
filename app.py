@@ -72,21 +72,55 @@ class TheWhiteRoom(Gtk.Window):
         cursor.execute("SELECT * FROM LOCATIONS")
         locations = cursor.fetchall()
         db.close()
-        print(locations)
-        self.location_labels = []
-        for location in locations:
-            label = Gtk.Label(label=location[1])
+        
+        self.location_labels = [] # List of Tuple's ofGtk.Label objects paired with their add item button
+
+        for location_id, location_name in locations:
+            # Location name text
+            label = Gtk.Label(label=location_name)
             self.box.add(label)
-            self.location_labels.append(label)
-            
-        #print(self.location_labels) List of Gtk.Label objects
+
+            # Add item to this location button
+            btn_add_item = Gtk.Button(label="Add item")
+            btn_add_item.location_id = location_id # adds attribute to button without making a sub class
+            btn_add_item.connect("clicked", self.add_item_to_location)
+            self.box.add(btn_add_item)
+
+            self.location_labels.append((label, btn_add_item)) 
 
 
+        # Back to dashboard button (Home screen)
         self.dashboardbutton = Gtk.Button(label="Dashboard", margin=0)
         self.dashboardbutton.connect("clicked", self.init_dashboard)
         self.box.add(self.dashboardbutton)
 
         self.box.show_all()
+
+
+    def add_item_to_location(self, button):
+        location_id = button.location_id
+
+        dialog = Gtk.Dialog(title="Add Item", parent=self, flags=0)
+        dialog.add_button("Cancel", Gtk.ResponseType.CANCEL)
+        dialog.add_button("Add", Gtk.ResponseType.OK)
+
+        entry = Gtk.Entry()
+        entry.set_placeholder_text("Item name")
+        box = dialog.get_content_area()
+        box.add(entry)
+        dialog.show_all()
+
+        response = dialog.run()
+        if response == Gtk.ResponseType.OK:
+            item_name = entry.get_text()
+            db = sqlite3.connect("data.db")
+            cursor = db.cursor()
+            cursor.execute("INSERT INTO items (name, location_id) VALUES (?, ?)", (item_name, location_id))
+            item_id = cursor.lastrowid
+            db.commit()
+            db.close()
+
+        dialog.destroy()
 
 
 
