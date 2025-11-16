@@ -88,8 +88,26 @@ class TheWhiteRoom(Gtk.Window):
             cursor.execute("SELECT * FROM items WHERE location_id = ?", (location_id,))
             items = cursor.fetchall()
             for item in items:
-                itemlabel = Gtk.Label(label=f"{item[1]} - {item[2]}", margin_bottom=5)
-                self.box.add(itemlabel)
+                itembox = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, margin=5)
+                if item[2]: # item[2] is item description (TODO add input to dialog to save description)
+                    itemlabel = Gtk.Label(label=f"{item[1]} - {item[2]}", margin_bottom=5)
+                else:
+                    itemlabel = Gtk.Label(label=f"{item[1]}", margin_bottom=5)
+                itembox.add(itemlabel)
+
+                # Edit Button
+                edit_item_button = Gtk.Button(label="Edit")
+                edit_item_button.item_id = item[0] # Add item ID as an attribute
+                edit_item_button.connect("clicked", self.edit_item)
+                itembox.add(edit_item_button)
+
+                # Delete Button
+                delete_item_button = Gtk.Button(label="Delete")
+                delete_item_button.item_id = item[0]
+                delete_item_button.connect("clicked", self.delete_item)
+                itembox.add(delete_item_button)
+
+                self.box.add(itembox)
 
             # Add item to this location button
             btn_add_item = Gtk.Button(label="Add item", margin_bottom=25)
@@ -134,7 +152,11 @@ class TheWhiteRoom(Gtk.Window):
         dialog.destroy()
         self.init_invspc(widget=None)
 
+    def edit_item(self, widget=None):
+        return 0
 
+    def delete_item(self, widget=None):
+        return 0
 
 win = TheWhiteRoom()
 win.connect("destroy", Gtk.main_quit) # Close the program when the x button is pressed
