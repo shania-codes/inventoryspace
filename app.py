@@ -195,7 +195,19 @@ class TheWhiteRoom(Gtk.Window):
         self.init_invspc(None) # Refresh inventory space "page"
 
     def delete_item(self, button):
-        return 0
+        item_id = button.item_id
+
+        dialog = Gtk.MessageDialog(parent=self, flags=0, message_type=Gtk.MessageType.QUESTION,buttons=Gtk.ButtonsType.YES_NO, text="Are you sure you want to delete this item?")
+        response = dialog.run()
+        dialog.destroy()
+
+        if response == Gtk.ResponseType.YES:
+            db = sqlite3.connect("data.db")
+            cursor = db.cursor()
+            cursor.execute("DELETE FROM items WHERE id=?", (item_id,))
+            db.commit()
+            db.close()
+            self.init_invspc(None) # "Refresh" inventory space "page"
 
 win = TheWhiteRoom()
 win.connect("destroy", Gtk.main_quit) # Close the program when the x button is pressed
